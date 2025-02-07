@@ -1,0 +1,6 @@
+[package]
+name = "emulador_gb"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
