@@ -573,6 +573,275 @@ impl CPU{
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, !c);
             },
+            0x40 => {
+                // LD B, B
+                self.registers.b = self.registers.b;
+            },
+            0x41 => {
+                // LD B, C
+                self.registers.b = self.registers.c;
+            },
+            0x42 => {
+                // LD B, D
+                self.registers.b = self.registers.d;
+            },
+            0x43 => {
+                // LD B, E
+                self.registers.b = self.registers.e;
+            },
+            0x44 => {
+                // LD B, H
+                self.registers.b = self.registers.h;
+            },
+            0x45 => {
+                // LD B, L
+                self.registers.b = self.registers.l;
+            },
+            0x46 => {
+                // LD B, (HL)
+                self.registers.b = self.memory.data[self.get_hl() as usize];
+            },
+            0x47 => {
+                // LD B, A
+                self.registers.b = self.registers.a;
+            },
+            0x48 => {
+                // LD C, B
+                self.registers.c = self.registers.b;
+            },
+            0x49 => {
+                // LD C, C
+                self.registers.c = self.registers.c;
+            },
+            0x4A => {
+                // LD C, D
+                self.registers.c = self.registers.d;
+            },
+            0x4B => {
+                // LD C, E
+                self.registers.c = self.registers.e;
+            },
+            0x4C => {
+                // LD C, H
+                self.registers.c = self.registers.h;
+            },
+            0x4D => {
+                // LD C, L
+                self.registers.c = self.registers.l;
+            },
+            0x4E => {
+                // LD C, (HL)
+                self.registers.c = self.memory.data[self.get_hl() as usize];
+            },
+            0x4F => {
+                // LD C, A
+                self.registers.c = self.registers.a;
+            },
+            0x50 => {
+                // LD D, B
+                self.registers.d = self.registers.b;
+            },
+            0x51 => {
+                // LD D, C
+                self.registers.d = self.registers.c;
+            },
+            0x52 => {
+                // LD D, D
+                self.registers.d = self.registers.d;
+            },
+            0x53 => {
+                // LD D, E
+                self.registers.d = self.registers.e;
+            },
+            0x54 => {
+                // LD D, H
+                self.registers.d = self.registers.h;
+            },
+            0x55 => {
+                // LD D, L
+                self.registers.d = self.registers.l;
+            },
+            0x56 => {
+                // LD D, (HL)
+                self.registers.d = self.memory.data[self.get_hl() as usize];
+            },
+            0x57 => {
+                // LD D, A
+                self.registers.d = self.registers.a;
+            },
+            0x58 => {
+                // LD E, B
+                self.registers.e = self.registers.b;
+            },
+            0x59 => {
+                // LD E, C
+                self.registers.e = self.registers.c;
+            },
+            0x5A => {
+                // LD E, D
+                self.registers.e = self.registers.d;
+            },
+            0x5B => {
+                // LD E, E
+                self.registers.e = self.registers.e;
+            },
+            0x5C => {
+                // LD E, H
+                self.registers.e = self.registers.h;
+            },
+            0x5D => {
+                // LD E, L
+                self.registers.e = self.registers.l;
+            },
+            0x5E => {
+                // LD E, (HL)
+                self.registers.e = self.memory.data[self.get_hl() as usize];
+            },
+            0x5F => {
+                // LD E, A
+                self.registers.e = self.registers.a;
+            },
+            0x60 => {
+                // LD H, B
+                self.registers.h = self.registers.b;
+            },
+            0x61 => {
+                // LD H, C
+                self.registers.h = self.registers.c;
+            },
+            0x62 => {
+                // LD H, D
+                self.registers.h = self.registers.d;
+            },
+            0x63 => {
+                // LD H, E
+                self.registers.h = self.registers.e;
+            },
+            0x64 => {
+                // LD H, H
+                self.registers.h = self.registers.h;
+            },
+            0x65 => {
+                // LD H, L
+                self.registers.h = self.registers.l;
+            },
+            0x66 => {
+                // LD H, (HL)
+                self.registers.h = self.memory.data[self.get_hl() as usize];
+            },
+            0x67 => {
+                // LD H, A
+                self.registers.h = self.registers.a;
+            },
+            0x68 => {
+                // LD L, B
+                self.registers.l = self.registers.b;
+            },
+            0x69 => {
+                // LD L, C
+                self.registers.l = self.registers.c;
+            },
+            0x6A => {
+                // LD L, D
+                self.registers.l = self.registers.d;
+            },
+            0x6B => {
+                // LD L, E
+                self.registers.l = self.registers.e;
+            },
+            0x6C => {
+                // LD L, H
+                self.registers.l = self.registers.h;
+            },
+            0x6D => {
+                // LD L, L
+                self.registers.l = self.registers.l;
+            },
+            0x6E => {
+                // LD L, (HL)
+                self.registers.l = self.memory.data[self.get_hl() as usize];
+            },
+            0x6F => {
+                // LD L, A
+                self.registers.l = self.registers.a;
+            },
+            0x70 => {
+                // LD (HL), B
+                self.memory.data[self.get_hl() as usize] = self.registers.b;
+            },
+            0x71 => {
+                // LD (HL), C
+                self.memory.data[self.get_hl() as usize] = self.registers.c;
+            },
+            0x72 => {
+                // LD (HL), D
+                self.memory.data[self.get_hl() as usize] = self.registers.d;
+            },
+            0x73 => {
+                // LD (HL), E
+                self.memory.data[self.get_hl() as usize] = self.registers.e;
+            },
+            0x74 => {
+                // LD (HL), H
+                self.memory.data[self.get_hl() as usize] = self.registers.h;
+            },
+            0x75 => {
+                // LD (HL), L
+                self.memory.data[self.get_hl() as usize] = self.registers.l;
+            },
+            0x76 =>{
+                // HALT
+                //TODO After a HALT instruction is executed, the system clock is stopped and HALT mode is entered. Although the system clock is stopped in this status, the oscillator circuit and LCD controller continue to operate.
+
+                // In addition, the status of the internal RAM register ports remains unchanged.
+
+                // HALT mode is cancelled by an interrupt or reset signal.
+
+                // The program counter is halted at the step after the HALT instruction. If both the interrupt request flag and the corresponding interrupt enable flag are set, HALT mode is exited, even if the interrupt master enable flag is not set.
+
+                // Once HALT mode is cancelled, the program starts from the address indicated by the program counter.
+
+                // If the interrupt master enable flag is set, the contents of the program coounter are pushed to the stack and control jumps to the starting address of the interrupt.
+
+                // If the RESET terminal goes LOW in HALT mode, the mode becomes that of a normal reset.
+            },
+            0x77 => {
+                // LD (HL), A
+                self.memory.data[self.get_hl() as usize] = self.registers.a;
+            },
+            0x78 => {
+                // LD A, B
+                self.registers.a = self.registers.b;
+            },
+            0x79 => {
+                // LD A, C
+                self.registers.a = self.registers.c;
+            },
+            0x7A => {
+                // LD A, D
+                self.registers.a = self.registers.d;
+            },
+            0x7B => {
+                // LD A, E
+                self.registers.a = self.registers.e;
+            },
+            0x7C => {
+                // LD A, H
+                self.registers.a = self.registers.h;
+            },
+            0x7D => {
+                // LD A, L
+                self.registers.a = self.registers.l;
+            },
+            0x7E => {
+                // LD A, (HL)
+                self.registers.a = self.memory.data[self.get_hl() as usize];
+            },
+            0x7F => {
+                // LD A, A
+                self.registers.a = self.registers.a;
+            },
+
             
             
             _ => {
