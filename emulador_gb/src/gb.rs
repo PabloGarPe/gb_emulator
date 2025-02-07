@@ -1129,6 +1129,150 @@ impl CPU{
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
             },
+            0xA0 => {
+                // AND B
+                let result = and(self.registers.a, self.registers.b);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA1 => {
+                // AND C
+                let result = and(self.registers.a, self.registers.c);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA2 => {
+                // AND D
+                let result = and(self.registers.a, self.registers.d);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA3 => {
+                // AND E
+                let result = and(self.registers.a, self.registers.e);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA4 => {
+                // AND H
+                let result = and(self.registers.a, self.registers.h);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA5 => {
+                // AND L
+                let result = and(self.registers.a, self.registers.l);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA6 => {
+                // AND (HL)
+                let result = and(self.registers.a, self.memory.data[self.get_hl() as usize]);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA7 => {
+                // AND A
+                let result = and(self.registers.a, self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, true);
+                self.set_flag(Flag::C, false);
+            },
+            0xA8 => {
+                // XOR B
+                let result = xor(self.registers.a, self.registers.b);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xA9 => {
+                // XOR C
+                let result = xor(self.registers.a, self.registers.c);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAA => {
+                // XOR D
+                let result = xor(self.registers.a, self.registers.d);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAB => {
+                // XOR E
+                let result = xor(self.registers.a, self.registers.e);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAC => {
+                // XOR H
+                let result = xor(self.registers.a, self.registers.h);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAD => {
+                // XOR L
+                let result = xor(self.registers.a, self.registers.l);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAE => {
+                // XOR (HL)
+                let result = xor(self.registers.a, self.memory.data[self.get_hl() as usize]);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
+            0xAF => {
+                // XOR A
+                let result = xor(self.registers.a, self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, false);
+            },
             _ => {
                 // Unhandled instruction
                 
