@@ -104,3 +104,87 @@ pub fn cp(a: u8, b: u8) -> Result {
         carry: Some(carry),
     }
 }
+#[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_add() {
+            let result = add(1, 1);
+            assert_eq!(result.value, 2);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(false));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_adc() {
+            let result = adc(1, 1, true);
+            assert_eq!(result.value, 3);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(false));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_sub() {
+            let result = sub(2, 1);
+            assert_eq!(result.value, 1);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(true));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_sbc() {
+            let result = sbc(2, 1, true);
+            assert_eq!(result.value, 0);
+            assert_eq!(result.zero, Some(true));
+            assert_eq!(result.add_sub, Some(true));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_and() {
+            let result = and(2, 3);
+            assert_eq!(result.value, 2);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(false));
+            assert_eq!(result.half_carry, Some(true));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_or() {
+            let result = or(2, 1);
+            assert_eq!(result.value, 3);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(false));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_xor() {
+            let result = xor(2, 3);
+            assert_eq!(result.value, 1);
+            assert_eq!(result.zero, Some(false));
+            assert_eq!(result.add_sub, Some(false));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+
+        #[test]
+        fn test_cp() {
+            let result = cp(2, 2);
+            assert_eq!(result.value, 2);
+            assert_eq!(result.zero, Some(true));
+            assert_eq!(result.add_sub, Some(true));
+            assert_eq!(result.half_carry, Some(false));
+            assert_eq!(result.carry, Some(false));
+        }
+    }
