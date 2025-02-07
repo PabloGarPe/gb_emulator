@@ -1,4 +1,4 @@
-use crate::operations::{inc, dec};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -841,9 +841,151 @@ impl CPU{
                 // LD A, A
                 self.registers.a = self.registers.a;
             },
-
-            
-            
+            0x80 => {
+                // ADD A, B
+                let result = add(self.registers.a, self.registers.b);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            }
+            0x81 => {
+                // ADD A, C
+                let result = add(self.registers.a, self.registers.c);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x82 => {
+                // ADD A, D
+                let result = add(self.registers.a, self.registers.d);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x83 => {
+                // ADD A, E
+                let result = add(self.registers.a, self.registers.e);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x84 => {
+                // ADD A, H
+                let result = add(self.registers.a, self.registers.h);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x85 => {
+                // ADD A, L
+                let result = add(self.registers.a, self.registers.l);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x86 => {
+                // ADD A, (HL)
+                let result = add(self.registers.a, self.memory.data[self.get_hl() as usize]);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x87 => {
+                // ADD A, A
+                let result = add(self.registers.a, self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x88 => {
+                // ADC A, B
+                let result = adc(self.registers.a, self.registers.b, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x89 => {
+                // ADC A, C
+                let result = adc(self.registers.a, self.registers.c, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8A => {
+                // ADC A, D
+                let result = adc(self.registers.a, self.registers.d, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8B => {
+                // ADC A, E
+                let result = adc(self.registers.a, self.registers.e, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8C => {
+                // ADC A, H
+                let result = adc(self.registers.a, self.registers.h, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8D => {
+                // ADC A, L
+                let result = adc(self.registers.a, self.registers.l, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8E => {
+                // ADC A, (HL)
+                let result = adc(self.registers.a, self.memory.data[self.get_hl() as usize], self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x8F => {
+                // ADC A, A
+                let result = adc(self.registers.a, self.registers.a, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+                       
             _ => {
                 // Unhandled instruction
                 
