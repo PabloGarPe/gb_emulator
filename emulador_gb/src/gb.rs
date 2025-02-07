@@ -985,7 +985,150 @@ impl CPU{
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
             },
-                       
+            0x90 => {
+                // SUB B
+                let result = sub(self.registers.a, self.registers.b);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x91 => {
+                // SUB C
+                let result = sub(self.registers.a, self.registers.c);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x92 => {
+                // SUB D
+                let result = sub(self.registers.a, self.registers.d);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },  
+            0x93 => {
+                // SUB E
+                let result = sub(self.registers.a, self.registers.e);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x94 => {
+                // SUB H
+                let result = sub(self.registers.a, self.registers.h);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x95 => {
+                // SUB L
+                let result = sub(self.registers.a, self.registers.l);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x96 =>{
+                // SUB (HL)
+                let result = sub(self.registers.a, self.memory.data[self.get_hl() as usize]);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x97 => {
+                // SUB A
+                let result = sub(self.registers.a, self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x98 => {
+                // SBC A, B
+                let result = sbc(self.registers.a, self.registers.b, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x99 => {
+                // SBC A, C
+                let result = sbc(self.registers.a, self.registers.c, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9A => {
+                // SBC A, D
+                let result = sbc(self.registers.a, self.registers.d, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9B => {
+                // SBC A, E
+                let result = sbc(self.registers.a, self.registers.e, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9C => {
+                // SBC A, H
+                let result = sbc(self.registers.a, self.registers.h, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9D => {
+                // SBC A, L
+                let result = sbc(self.registers.a, self.registers.l, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9E => {
+                // SBC A, (HL)
+                let result = sbc(self.registers.a, self.memory.data[self.get_hl() as usize], self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
+            0x9F => {
+                // SBC A, A
+                let result = sbc(self.registers.a, self.registers.a, self.get_flag(Flag::C));
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                self.set_flag(Flag::C, result.carry.unwrap());
+            },
             _ => {
                 // Unhandled instruction
                 
