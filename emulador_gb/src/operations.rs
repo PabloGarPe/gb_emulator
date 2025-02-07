@@ -104,6 +104,16 @@ pub fn cp(a: u8, b: u8) -> Result {
         carry: Some(carry),
     }
 }
+
+pub fn inc(value: u8) -> Result{
+    add(value,1)
+}
+
+pub fn dec(value: u8) -> Result{
+    sub(value,1)
+}
+
+
 #[cfg(test)]
     mod tests {
         use super::*;
