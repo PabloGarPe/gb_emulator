@@ -264,6 +264,124 @@ impl CPU{
                 self.set_flag(Flag::H, false);
                 1
             },
+            0x10 => {
+                // STOP
+                // TODO: Implement Execution of a STOP instruction stops both the system clock and oscillator circuit.
+                // STOP mode is entered and the LCD controller also stops. However, the status of the internal RAM register ports remains unchanged.
+                // STOP mode can be cancelled by a reset signal.
+                // If the RESET terminal goes LOW in STOP mode, it becomes that of a normal reset status.
+                // The following conditions should be met before a STOP instruction is executed and stop mode is entered:
+                // All interrupt-enable (IE) flags are reset.
+                // Input to P10-P13 is LOW for all.
+                1
+            },
+            0x11 => {
+                // LD DE, d16
+                let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
+                self.set_de(value);
+                1
+            },
+            0x12 => {
+                // LD (DE), A
+                self.memory.data[self.get_de() as usize] = self.registers.a;
+                1
+            },
+            0x13 => {
+                // INC DE
+                self.set_de(self.get_de().wrapping_add(1));
+                1
+            },
+            0x14 => {
+                // INC D
+                let result = inc(self.registers.d);
+                self.registers.d = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
+            },
+            0x15 => {
+                // DEC D
+                let result = dec(self.registers.d);
+                self.registers.d = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
+            },
+            0x16 => {
+                // LD D, d8
+                self.registers.d = self.next_instruction();
+                1
+            },
+            0x17 => {
+                // RLA
+                let carry = self.registers.a >> 7;
+                self.registers.a = (self.registers.a << 1) | self.get_flag(Flag::C) as u8;
+                self.set_flag(Flag::C, carry == 1);
+                self.set_flag(Flag::Z, false);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                1
+            },
+            0x18 => {
+                // JR s8
+                let offset = self.next_instruction() as u8 as u16;
+                self.registers.pc = self.registers.pc.wrapping_add(offset);
+                1
+            },
+            0x19 => {
+                // ADD HL, DE
+                let result = self.get_hl().wrapping_add(self.get_de());
+                self.set_hl(result);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_de() & 0xFFF) > 0xFFF);
+                self.set_flag(Flag::C, self.get_hl() as u32 + self.get_de() as u32 > 0xFFFF);
+                1
+            },
+            0x1A => {
+                // LD A, (DE)
+                self.registers.a = self.memory.data[self.get_de() as usize];
+                1
+            },
+            0x1B => {
+                // DEC DE
+                self.set_de(self.get_de().wrapping_sub(1));
+                1
+            },
+            0x1C => {
+                // INC E
+                let result = inc(self.registers.e);
+                self.registers.e = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
+            },
+            0x1D => {
+                // DEC E
+                let result = dec(self.registers.e);
+                self.registers.e = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
+            },
+            0x1E => {
+                // LD E, d8
+                self.registers.e = self.next_instruction();
+                1
+            },
+            0x1F => {
+                // RRA
+                let carry = self.registers.a & 1;
+                self.registers.a = (self.registers.a >> 1) | (self.get_flag(Flag::C) as u8) << 7;
+                self.set_flag(Flag::C, carry == 1);
+                self.set_flag(Flag::Z, false);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                1
+            },
             _ => {
                 // Unhandled instruction
                 0
