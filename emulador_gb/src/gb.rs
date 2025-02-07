@@ -162,6 +162,28 @@ impl CPU{
         instruction
     }
 
+    /// Get the value of the next two instructions
+    fn read_word(&mut self) -> u16 {
+        let instruction: u16 = self.memory.data[self.registers.pc as usize] as u16 | (self.memory.data[self.registers.pc.wrapping_add(1) as usize] as u16) << 8;
+        self.registers.pc = self.registers.pc.wrapping_add(2);
+        instruction
+    }
+
+    /// Get the value of the ram
+    fn pop(&mut self) -> u16 {
+        let value = self.memory.data[self.registers.sp as usize] as u16 | (self.memory.data[self.registers.sp.wrapping_add(1) as usize] as u16) << 8;
+        self.registers.sp = self.registers.sp.wrapping_add(1);
+        value
+    }
+
+    /// Set the value of the ram
+    fn push(&mut self, value: u16){
+        self.registers.sp = self.registers.sp.wrapping_sub(1);
+        self.memory.data[self.registers.sp as usize] = (value >> 8) as u8;
+        self.registers.sp = self.registers.sp.wrapping_sub(1);
+        self.memory.data[self.registers.sp as usize] = (value & 0xFF) as u8;
+    }
+
     /// Execute the next instruction
     fn execute(&mut self){
         match self.next_instruction() {
@@ -1409,6 +1431,74 @@ impl CPU{
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
             },
+            0xC0 => {
+                // RET NZ
+                if !self.get_flag(Flag::Z) {
+                    self.registers.pc = self.pop();
+                }
+            },
+            0xC1 => {
+                // POP BC
+                let value = self.pop();
+                self.set_bc(value);
+            },
+            0xC2 => {
+                // JP NZ, a16
+                let address = self.read_word();
+                if !self.get_flag(Flag::Z) {
+                    self.registers.pc = address;
+                }
+            },
+            0xC3 => {
+                // JP a16
+                let address = self.read_word();
+                self.registers.pc = address;
+            },
+            0xC4 => {
+                // CALL NZ, a16
+                let address = self.read_word();
+                if !self.get_flag(Flag::Z) {
+                    self.push(self.registers.pc);
+                    self.registers.pc = address;
+                }
+            },
+            0xC5 => {
+                // PUSH BC
+                self.push(self.get_bc());
+            },
+            0xC6 => {
+                // ADD A, d8
+                let value = add(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,value.half_carry.unwrap());
+                self.set_flag(Flag::C,value.carry.unwrap());
+
+            },
+            0xC7 => {
+                // RST 00H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x00;
+            },
+            0xC8 => {
+                // RET Z
+                if self.get_flag(Flag::Z) {
+                    self.registers.pc = self.pop();
+                }
+            },
+            0xC9 => {
+                // RET
+                self.registers.pc = self.pop();
+            },
+            0xCA => {
+                // JP Z, a16
+                let address = self.read_word();
+                if self.get_flag(Flag::Z) {
+                    self.registers.pc = address;
+                }
+            },
+
             _ => {
                 // Unhandled instruction
                 
