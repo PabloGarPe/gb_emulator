@@ -1,4 +1,17 @@
 use crate::operations::{inc, dec};
+
+const MEMORY_SIZE: usize = 65536;
+const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
+const ROM_BANK_1: usize = 0x4000; // ROM Bank 1 (32KB)
+const VRAM: usize = 0x8000; // VRAM (8KB) Background tiles
+const CARTRIDGE_RAM:usize = 0xA000;
+const WORK_RAM: usize = 0xC000; // RAM Bank 0 (8KB)
+// Space not used
+const OAM: usize = 0xFE00; // OAM (Sprites) (160 bytes) also tiles
+//Space not used
+const IO_REGISTERS: usize = 0xFF00; // IO Registros (80 bytes)
+const HIGH_RAM: usize = 0xFF80; // Memoria de alto rendimiento (128 bytes) //Acceso un ciclo mas rapido
+
 /// Register of the game boy CPU
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Register {
@@ -55,14 +68,14 @@ impl Register {
 /// Just a placeholder for now
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Memory {
-    data: [u8; 0x10000],
+    data: [u8; MEMORY_SIZE],
 }
 
 /// Implement the Memory struct
 impl Memory {
     fn new() -> Self {
         Memory {
-            data: [0; 0x10000],
+            data: [0; MEMORY_SIZE],
         }
     }
 }
@@ -150,28 +163,24 @@ impl CPU{
     }
 
     /// Execute the next instruction
-    fn execute(&mut self) -> u8{
+    fn execute(&mut self){
         match self.next_instruction() {
             0x00 => {
                 // NOP
-                1
             },
             0x01 => {
                 // LD BC, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.set_bc(value);
-                1
-            },
+                            },
             0x02 => {
                 // LD (BC), A
                 self.memory.data[self.get_bc() as usize] = self.registers.a;
-                1
-            },
+                            },
             0x03 => {
                 // INC BC
                 self.set_bc(self.get_bc().wrapping_add(1));
-                1
-            },
+                            },
             0x04 => {
                 // INC B
                 let result = inc(self.registers.b);
@@ -179,8 +188,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
-            },
+                            },
             0x05 => {
                 // DEC B
                 let result = dec(self.registers.b);
@@ -188,13 +196,11 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
-            },
+                            },
             0x06 => {
                 // LD B, d8
                 self.registers.b = self.next_instruction();
-                1
-            },
+                            },
             0x07 => {
                 // RLCA
                 let carry = self.registers.a >> 7;
@@ -203,15 +209,13 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
-                1
-            },
+                },
             0x08 => {
                 // LD (a16), SP
                 let address = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.memory.data[address as usize] = self.registers.sp as u8;
                 self.memory.data[(address + 1) as usize] = (self.registers.sp >> 8) as u8;
-                1
-            },
+                            },
             0x09 => {
                 // ADD HL, BC
                 let result = self.get_hl().wrapping_add(self.get_bc());
@@ -219,17 +223,14 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_bc() & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.get_bc() as u32 > 0xFFFF);
-                1
-            },
+                            },
             0x0A => {
                 // LD A, (BC)
                 self.registers.a = self.memory.data[self.get_bc() as usize];
-                1
-            },
+                            },
             0x0B => {
                 // DEC BC
                 self.set_bc(self.get_bc().wrapping_sub(1));
-                1
             },
             0x0C => {
                 // INC C
@@ -238,7 +239,6 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x0D => {
                 // DEC C
@@ -247,12 +247,10 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x0E => {
                 // LD C, d8
                 self.registers.c = self.next_instruction();
-                1
             },
             0x0F => {
                 // RRCA
@@ -262,7 +260,6 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
-                1
             },
             0x10 => {
                 // STOP
@@ -273,23 +270,19 @@ impl CPU{
                 // The following conditions should be met before a STOP instruction is executed and stop mode is entered:
                 // All interrupt-enable (IE) flags are reset.
                 // Input to P10-P13 is LOW for all.
-                1
             },
             0x11 => {
                 // LD DE, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.set_de(value);
-                1
             },
             0x12 => {
                 // LD (DE), A
                 self.memory.data[self.get_de() as usize] = self.registers.a;
-                1
             },
             0x13 => {
                 // INC DE
                 self.set_de(self.get_de().wrapping_add(1));
-                1
             },
             0x14 => {
                 // INC D
@@ -298,7 +291,6 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x15 => {
                 // DEC D
@@ -307,12 +299,10 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x16 => {
                 // LD D, d8
                 self.registers.d = self.next_instruction();
-                1
             },
             0x17 => {
                 // RLA
@@ -322,13 +312,11 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
-                1
             },
             0x18 => {
                 // JR s8
                 let offset = self.next_instruction() as u8 as u16;
                 self.registers.pc = self.registers.pc.wrapping_add(offset);
-                1
             },
             0x19 => {
                 // ADD HL, DE
@@ -337,17 +325,14 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_de() & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.get_de() as u32 > 0xFFFF);
-                1
             },
             0x1A => {
                 // LD A, (DE)
                 self.registers.a = self.memory.data[self.get_de() as usize];
-                1
             },
             0x1B => {
                 // DEC DE
                 self.set_de(self.get_de().wrapping_sub(1));
-                1
             },
             0x1C => {
                 // INC E
@@ -356,7 +341,6 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x1D => {
                 // DEC E
@@ -365,12 +349,10 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
-                1
             },
             0x1E => {
                 // LD E, d8
                 self.registers.e = self.next_instruction();
-                1
             },
             0x1F => {
                 // RRA
@@ -380,11 +362,124 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
-                1
+                
             },
+            0x20 => {
+                // JR NZ, s8
+                let offset = self.next_instruction() as u8 as u16;
+                if !self.get_flag(Flag::Z) {
+                    self.registers.pc = self.registers.pc.wrapping_add(offset);
+                }
+            },
+            0x21 => {
+                // LD HL, d16
+                let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
+                self.set_hl(value);
+            },
+            0x22 => {
+                // LDI (HL), A
+                self.memory.data[self.get_hl() as usize] = self.registers.a;
+                self.set_hl(self.get_hl().wrapping_add(1));
+            },
+            0x23 => {
+                // INC HL
+                self.set_hl(self.get_hl().wrapping_add(1));
+            },
+            0x24 => {
+                // INC H
+                let result = inc(self.registers.h);
+                self.registers.h = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x25 => {
+                // DEC H
+                let result = dec(self.registers.h);
+                self.registers.h = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x26 => {
+                // LD H, d8
+                self.registers.h = self.next_instruction();
+            },
+            0x27 => {
+                // DAA
+                let mut a = self.registers.a;
+                let mut adjust: u8 = 0;
+                if self.get_flag(Flag::H) || (!self.get_flag(Flag::N) && (a & 0xF) > 9){
+                    adjust |= 0x06;
+                }
+                if self.get_flag(Flag::C) || (!self.get_flag(Flag::N) && a > 0x99){
+                    adjust |= 0x60;
+                    self.set_flag(Flag::C, true);
+                }
+                if self.get_flag(Flag::N){
+                    a = a.wrapping_sub(adjust);
+                } else {
+                    a = a.wrapping_add(adjust);
+                }
+                self.set_flag(Flag::Z, a == 0);
+                self.set_flag(Flag::H, false);
+                self.registers.a = a;
+            },
+            0x28 => {
+                // JR Z, s8
+                let offset = self.next_instruction() as u8 as u16;
+                if self.get_flag(Flag::Z) {
+                    self.registers.pc = self.registers.pc.wrapping_add(offset);
+                }
+            },
+            0x29 => {
+                // ADD HL, HL
+                let result = self.get_hl().wrapping_add(self.get_hl());
+                self.set_hl(result);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_hl() & 0xFFF) > 0xFFF);
+                self.set_flag(Flag::C, self.get_hl() as u32 + self.get_hl() as u32 > 0xFFFF);
+            },
+            0x2A => {
+                // LDI A, (HL)
+                self.registers.a = self.memory.data[self.get_hl() as usize];
+                self.set_hl(self.get_hl().wrapping_add(1));
+            },
+            0x2B => {
+                // DEC HL
+                self.set_hl(self.get_hl().wrapping_sub(1));
+            },
+            0x2C => {
+                // INC L
+                let result = inc(self.registers.l);
+                self.registers.l = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x2D => {
+                // DEC L
+                let result = dec(self.registers.l);
+                self.registers.l = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x2E => {
+                // LD L, d8
+                self.registers.l = self.next_instruction();
+            },
+            0x2F => {
+                // CPL
+                let a = !self.registers.a;
+                self.registers.a = a;
+                self.set_flag(Flag::N, true);
+            },
+            
+            
             _ => {
                 // Unhandled instruction
-                0
+                
             }
         }
             
