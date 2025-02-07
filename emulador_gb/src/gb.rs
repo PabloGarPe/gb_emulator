@@ -1498,7 +1498,37 @@ impl CPU{
                     self.registers.pc = address;
                 }
             },
-
+            0xCB => {
+                // PREFIX CB TODO
+            },
+            0xCC => {
+                // CALL Z, a16
+                let address = self.read_word();
+                if self.get_flag(Flag::Z) {
+                    self.push(self.registers.pc);
+                    self.registers.pc = address;
+                }
+            },
+            0xCD => {
+                // CALL a16
+                let address = self.read_word();
+                self.push(self.registers.pc);
+                self.registers.pc = address;
+            },
+            0xCE => {
+                // ADC A, d8
+                let value = adc(self.registers.a,self.memory.data[self.registers.sp as usize],self.get_flag(Flag::C));
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,value.half_carry.unwrap());
+                self.set_flag(Flag::C,value.carry.unwrap());
+            },
+            0xCF => {
+                // RST 08H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x08;
+            },
             _ => {
                 // Unhandled instruction
                 
