@@ -475,6 +475,104 @@ impl CPU{
                 self.registers.a = a;
                 self.set_flag(Flag::N, true);
             },
+            0x30 => {
+                // JR NC, s8
+                let offset = self.next_instruction() as u8 as u16;
+                if !self.get_flag(Flag::C) {
+                    self.registers.pc = self.registers.pc.wrapping_add(offset);
+                }
+            },
+            0x31 => {
+                // LD SP, d16
+                let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
+                self.registers.sp = value;
+            },
+            0x32 => {
+                // LDD (HL), A
+                self.memory.data[self.get_hl() as usize] = self.registers.a;
+                self.set_hl(self.get_hl().wrapping_sub(1));
+            },
+            0x33 => {
+                // INC SP
+                self.registers.sp = self.registers.sp.wrapping_add(1);
+            },
+            0x34 => {
+                // INC (HL)
+                let result = inc(self.memory.data[self.get_hl() as usize]);
+                self.memory.data[self.get_hl() as usize] = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x35 => {
+                // DEC (HL)
+                let result = dec(self.memory.data[self.get_hl() as usize]);
+                self.memory.data[self.get_hl() as usize] = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x36 => {
+                // LD (HL), d8
+                self.memory.data[self.get_hl() as usize] = self.next_instruction();
+            },
+            0x37 => {
+                // SCF
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, true);
+            },
+            0x38 => {
+                // JR C, s8
+                let offset = self.next_instruction() as u8 as u16;
+                if self.get_flag(Flag::C) {
+                    self.registers.pc = self.registers.pc.wrapping_add(offset);
+                }
+            },
+            0x39 => {
+                // ADD HL, SP
+                let result = self.get_hl().wrapping_add(self.registers.sp);
+                self.set_hl(result);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.registers.sp & 0xFFF) > 0xFFF);
+                self.set_flag(Flag::C, self.get_hl() as u32 + self.registers.sp as u32 > 0xFFFF);
+            },
+            0x3A => {
+                // LDD A, (HL)
+                self.registers.a = self.memory.data[self.get_hl() as usize];
+                self.set_hl(self.get_hl().wrapping_sub(1));
+            },
+            0x3B => {
+                // DEC SP
+                self.registers.sp = self.registers.sp.wrapping_sub(1);
+            },
+            0x3C => {
+                // INC A
+                let result = inc(self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x3D => {
+                // DEC A
+                let result = dec(self.registers.a);
+                self.registers.a = result.value;
+                self.set_flag(Flag::Z, result.zero.unwrap());
+                self.set_flag(Flag::N, result.add_sub.unwrap());
+                self.set_flag(Flag::H, result.half_carry.unwrap());
+            },
+            0x3E => {
+                // LD A, d8
+                self.registers.a = self.next_instruction();
+            },
+            0x3F => {
+                // CCF
+                let c = self.get_flag(Flag::C);
+                self.set_flag(Flag::N, false);
+                self.set_flag(Flag::H, false);
+                self.set_flag(Flag::C, !c);
+            },
             
             
             _ => {
