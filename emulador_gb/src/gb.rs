@@ -1500,6 +1500,8 @@ impl CPU{
             },
             0xCB => {
                 // PREFIX CB TODO
+                let opcode = self.next_instruction();
+                self.execute_cb_instruction(opcode);
             },
             0xCC => {
                 // CALL Z, a16
@@ -1529,6 +1531,94 @@ impl CPU{
                 self.push(self.registers.pc);
                 self.registers.pc = 0x08;
             },
+            0xD0 => {
+                // RET NC
+                if !self.get_flag(Flag::C) {
+                    self.registers.pc = self.pop();
+                }
+            },
+            0xD1 => {
+                // POP DE
+                let value = self.pop();
+                self.set_de(value);
+            },
+            0xD2 => {
+                // JP NC, a16
+                let address = self.read_word();
+                if !self.get_flag(Flag::C) {
+                    self.registers.pc = address;
+                }
+            },
+            0xD4 => {
+                // CALL NC, a16
+                let address = self.read_word();
+                if !self.get_flag(Flag::C) {
+                    self.push(self.registers.pc);
+                    self.registers.pc = address;
+                }
+            },
+            0xD5 => {
+                // PUSH DE
+                self.push(self.get_de());
+            },
+            0xD6 => {
+                // SUB d8
+                let value = sub(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,true);
+                self.set_flag(Flag::H,value.half_carry.unwrap());
+                self.set_flag(Flag::C,value.carry.unwrap());
+            },
+            0xD7 => {
+                // RST 10H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x10;
+            },
+            0xD8 => {
+                // RET C
+                if self.get_flag(Flag::C) {
+                    self.registers.pc = self.pop();
+                }
+            },
+            0xD9 => {
+                // RETI
+                // TODO
+                // Used when an interrupt-service routine finishes.
+                // The address for the return from the interrupt is loaded in the program counter PC. The master interrupt enable flag is returned to its pre-interrupt status.
+                // The contents of the address specified by the stack pointer SP are loaded in the lower-order byte of PC, and the contents of SP are incremented by 1. 
+                //The contents of the address specified by the new SP value are then loaded in the higher-order byte of PC, and the contents of SP are incremented by 1 again. 
+                //(THe value of SP is 2 larger than before instruction execution.) The next instruction is fetched from the address specified by the content of PC (as usual)
+            },
+            0xDA => {
+                // JP C, a16
+                let address = self.read_word();
+                if self.get_flag(Flag::C) {
+                    self.registers.pc = address;
+                }
+            },
+            0xDC => {
+                // CALL C, a16
+                let address = self.read_word();
+                if self.get_flag(Flag::C) {
+                    self.push(self.registers.pc);
+                    self.registers.pc = address;
+                }
+            },
+            0xDE => {
+                // SBC A, d8
+                let value = sbc(self.registers.a,self.memory.data[self.registers.sp as usize],self.get_flag(Flag::C));
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,true);
+                self.set_flag(Flag::H,value.half_carry.unwrap());
+                self.set_flag(Flag::C,value.carry.unwrap());
+            },
+            0xDF => {
+                // RST 18H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x18;
+            },
             _ => {
                 // Unhandled instruction
                 
@@ -1536,4 +1626,13 @@ impl CPU{
         }
             
         }
+
+    fn execute_cb_instruction(&mut self, instruction: u8){
+        // TODO
+        match instruction {
+            _ => {
+                // Unhandled instruction
+            }
+        }
+    }
 }
