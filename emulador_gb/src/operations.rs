@@ -7,6 +7,15 @@ pub struct Result {
     pub carry: Option<bool>,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Result16 {
+    pub value: u16,
+    pub zero: Option<bool>,
+    pub add_sub: Option<bool>,
+    pub half_carry: Option<bool>,
+    pub carry: Option<bool>,
+}
+
 fn half_carry_sum(a: u8, b: u8) -> bool {
     ((a & 0x0F) + (b & 0x0F)) & 0x10 == 0x10
 }
@@ -111,6 +120,17 @@ pub fn inc(value: u8) -> Result{
 
 pub fn dec(value: u8) -> Result{
     sub(value,1)
+}
+
+pub fn add_sp(value:u16, offset:u8) -> Result16{
+    let (result, carry) = value.overflowing_add(offset as u16);
+    Result16 {
+        value: result as u16,
+        zero: Some(false),
+        add_sub: Some(false),
+        half_carry: Some((value & 0x0F) + (offset as u16 & 0x0F) > 0x0F),
+        carry: Some(carry),
+    }
 }
 
 

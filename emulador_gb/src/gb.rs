@@ -1,4 +1,4 @@
-use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -1618,6 +1618,151 @@ impl CPU{
                 // RST 18H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x18;
+            },
+            0xE0 => {
+                // LDH (a8), A
+                let address = 0xFF00 + self.next_instruction() as u16;
+                self.memory.data[address as usize] = self.registers.a;
+            },
+            0xE1 => {
+                // POP HL
+                let value = self.pop();
+                self.set_hl(value);
+            },
+            0xE2 => {
+                // LD (C), A
+                let address = 0xFF00 + self.registers.c as u16;
+                self.memory.data[address as usize] = self.registers.a;
+            },
+            0xE5 => {
+                // PUSH HL
+                self.push(self.get_hl());
+            },
+            0xE6 => {
+                // AND d8
+                let value = and(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,true);
+                self.set_flag(Flag::C,false);
+            },
+            0xE7 => {
+                // RST 20H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x20;
+            },
+            0xE8 => {
+                // ADD SP, r8
+                let value = self.memory.data[self.registers.sp as usize];
+                let result = add_sp(self.registers.sp,value);
+                self.registers.sp = result.value;
+                self.set_flag(Flag::Z,result.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,result.half_carry.unwrap());
+                self.set_flag(Flag::C,result.carry.unwrap());
+            },
+            0xE9 => {
+                // JP (HL)
+                self.registers.pc = self.get_hl();
+            },
+            0xEA => {
+                // LD (a16), A
+                let address = self.read_word();
+                self.memory.data[address as usize] = self.registers.a;
+            },
+            0xEE => {
+                // XOR d8
+                let value = xor(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,false);
+            },
+            0xEF => {
+                // RST 28H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x28;
+            },
+            0xF0 => {
+                // LDH A, (a8)
+                let address = 0xFF00 + self.next_instruction() as u16;
+                self.registers.a = self.memory.data[address as usize];
+            },
+            0xF1 => {
+                // POP AF
+                let value = self.pop();
+                self.set_af(value);
+            },
+            0xF2 => {
+                // LD A, (C)
+                let address = 0xFF00 + self.registers.c as u16;
+                self.registers.a = self.memory.data[address as usize];
+            },
+            0xF3 => {
+                // DI
+                // TODO
+                // Disables interrupts but not immediately. Interrupts are disabled after instruction after DI is executed.
+                // The DI instruction disables maskable interrupts but not non-maskable interrupts. 
+                // The interrupt enable flag is reset to 0. The next instruction is fetched from the address specified by the content of the program counter PC.
+            },
+            0xF5 => {
+                // PUSH AF
+                self.push(self.get_af());
+            },
+            0xF6 => {
+                // OR d8
+                let value = or(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,false);
+            },
+            0xF7 => {
+                // RST 30H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x30;
+            },
+            0xF8 => {
+                // LD HL, SP+r8
+                let value = self.memory.data[self.registers.sp as usize];
+                let result = add_sp(self.registers.sp,value);
+                self.set_hl(result.value);
+                self.set_flag(Flag::Z,result.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,result.half_carry.unwrap());
+                self.set_flag(Flag::C,result.carry.unwrap());
+            },
+            0xF9 => {
+                // LD SP, HL
+                self.registers.sp = self.get_hl();
+            },
+            0xFA => {
+                // LD A, (a16)
+                let address = self.read_word();
+                self.registers.a = self.memory.data[address as usize];
+            },
+            0xFB => {
+                // EI
+                // TODO
+                // Enables interrupts but not immediately. Interrupts are enabled after instruction after
+                // EI
+                // is executed. The EI instruction enables maskable interrupts. The interrupt enable flag is set to 1. The next instruction is fetched from the address specified by the content of the program counter PC.
+            },
+            0xFE => {
+                // CP d8
+                let value = cp(self.registers.a,self.memory.data[self.registers.sp as usize]);
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,true);
+                self.set_flag(Flag::H,value.half_carry.unwrap());
+                self.set_flag(Flag::C,value.carry.unwrap());
+            },
+            0xFF => {
+                // RST 38H
+                self.push(self.registers.pc);
+                self.registers.pc = 0x38;
             },
             _ => {
                 // Unhandled instruction
