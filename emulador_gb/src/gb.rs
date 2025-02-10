@@ -185,23 +185,28 @@ impl CPU{
     }
 
     /// Execute the next instruction
-    fn execute(&mut self){
+    fn execute(&mut self) -> u8{
         match self.next_instruction() {
             0x00 => {
                 // NOP
+                1
             },
             0x01 => {
                 // LD BC, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.set_bc(value);
+                3
                             },
             0x02 => {
                 // LD (BC), A
                 self.memory.data[self.get_bc() as usize] = self.registers.a;
+                2
                             },
             0x03 => {
                 // INC BC
                 self.set_bc(self.get_bc().wrapping_add(1));
+                2
+
                             },
             0x04 => {
                 // INC B
@@ -210,6 +215,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
                             },
             0x05 => {
                 // DEC B
@@ -218,10 +224,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
                             },
             0x06 => {
                 // LD B, d8
                 self.registers.b = self.next_instruction();
+                2
                             },
             0x07 => {
                 // RLCA
@@ -231,12 +239,14 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
+                1
                 },
             0x08 => {
                 // LD (a16), SP
                 let address = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.memory.data[address as usize] = self.registers.sp as u8;
                 self.memory.data[(address + 1) as usize] = (self.registers.sp >> 8) as u8;
+                5
                             },
             0x09 => {
                 // ADD HL, BC
@@ -245,14 +255,17 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_bc() & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.get_bc() as u32 > 0xFFFF);
+                2
                             },
             0x0A => {
                 // LD A, (BC)
                 self.registers.a = self.memory.data[self.get_bc() as usize];
+                2
                             },
             0x0B => {
                 // DEC BC
                 self.set_bc(self.get_bc().wrapping_sub(1));
+                2
             },
             0x0C => {
                 // INC C
@@ -261,6 +274,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x0D => {
                 // DEC C
@@ -269,10 +283,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x0E => {
                 // LD C, d8
                 self.registers.c = self.next_instruction();
+                2
             },
             0x0F => {
                 // RRCA
@@ -282,6 +298,7 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
+                1
             },
             0x10 => {
                 // STOP
@@ -292,19 +309,23 @@ impl CPU{
                 // The following conditions should be met before a STOP instruction is executed and stop mode is entered:
                 // All interrupt-enable (IE) flags are reset.
                 // Input to P10-P13 is LOW for all.
+                1
             },
             0x11 => {
                 // LD DE, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.set_de(value);
+                3
             },
             0x12 => {
                 // LD (DE), A
                 self.memory.data[self.get_de() as usize] = self.registers.a;
+                2
             },
             0x13 => {
                 // INC DE
                 self.set_de(self.get_de().wrapping_add(1));
+                2
             },
             0x14 => {
                 // INC D
@@ -313,6 +334,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x15 => {
                 // DEC D
@@ -321,10 +343,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x16 => {
                 // LD D, d8
                 self.registers.d = self.next_instruction();
+                2
             },
             0x17 => {
                 // RLA
@@ -334,11 +358,13 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
+                1
             },
             0x18 => {
                 // JR s8
                 let offset = self.next_instruction() as u8 as u16;
                 self.registers.pc = self.registers.pc.wrapping_add(offset);
+                3
             },
             0x19 => {
                 // ADD HL, DE
@@ -347,14 +373,17 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_de() & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.get_de() as u32 > 0xFFFF);
+                2
             },
             0x1A => {
                 // LD A, (DE)
                 self.registers.a = self.memory.data[self.get_de() as usize];
+                2
             },
             0x1B => {
                 // DEC DE
                 self.set_de(self.get_de().wrapping_sub(1));
+                2
             },
             0x1C => {
                 // INC E
@@ -363,6 +392,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x1D => {
                 // DEC E
@@ -371,10 +401,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x1E => {
                 // LD E, d8
                 self.registers.e = self.next_instruction();
+                2
             },
             0x1F => {
                 // RRA
@@ -384,6 +416,7 @@ impl CPU{
                 self.set_flag(Flag::Z, false);
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
+                1
                 
             },
             0x20 => {
@@ -391,21 +424,26 @@ impl CPU{
                 let offset = self.next_instruction() as u8 as u16;
                 if !self.get_flag(Flag::Z) {
                     self.registers.pc = self.registers.pc.wrapping_add(offset);
+                    return 3
                 }
+                2
             },
             0x21 => {
                 // LD HL, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.set_hl(value);
+                3
             },
             0x22 => {
                 // LDI (HL), A
                 self.memory.data[self.get_hl() as usize] = self.registers.a;
                 self.set_hl(self.get_hl().wrapping_add(1));
+                2
             },
             0x23 => {
                 // INC HL
                 self.set_hl(self.get_hl().wrapping_add(1));
+                2
             },
             0x24 => {
                 // INC H
@@ -414,6 +452,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x25 => {
                 // DEC H
@@ -422,10 +461,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x26 => {
                 // LD H, d8
                 self.registers.h = self.next_instruction();
+                2
             },
             0x27 => {
                 // DAA
@@ -446,13 +487,16 @@ impl CPU{
                 self.set_flag(Flag::Z, a == 0);
                 self.set_flag(Flag::H, false);
                 self.registers.a = a;
+                1
             },
             0x28 => {
                 // JR Z, s8
                 let offset = self.next_instruction() as u8 as u16;
                 if self.get_flag(Flag::Z) {
                     self.registers.pc = self.registers.pc.wrapping_add(offset);
+                    return 3
                 }
+                2
             },
             0x29 => {
                 // ADD HL, HL
@@ -461,15 +505,18 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.get_hl() & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.get_hl() as u32 > 0xFFFF);
+                2
             },
             0x2A => {
                 // LDI A, (HL)
                 self.registers.a = self.memory.data[self.get_hl() as usize];
                 self.set_hl(self.get_hl().wrapping_add(1));
+                2
             },
             0x2B => {
                 // DEC HL
                 self.set_hl(self.get_hl().wrapping_sub(1));
+                2
             },
             0x2C => {
                 // INC L
@@ -478,6 +525,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x2D => {
                 // DEC L
@@ -486,37 +534,46 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x2E => {
                 // LD L, d8
                 self.registers.l = self.next_instruction();
+                2
             },
             0x2F => {
                 // CPL
                 let a = !self.registers.a;
                 self.registers.a = a;
                 self.set_flag(Flag::N, true);
+                self.set_flag(Flag::H, true);
+                1
             },
             0x30 => {
                 // JR NC, s8
                 let offset = self.next_instruction() as u8 as u16;
                 if !self.get_flag(Flag::C) {
                     self.registers.pc = self.registers.pc.wrapping_add(offset);
+                    return 3
                 }
+                2
             },
             0x31 => {
                 // LD SP, d16
                 let value = self.next_instruction() as u16 | (self.next_instruction() as u16) << 8;
                 self.registers.sp = value;
+                3
             },
             0x32 => {
                 // LDD (HL), A
                 self.memory.data[self.get_hl() as usize] = self.registers.a;
                 self.set_hl(self.get_hl().wrapping_sub(1));
+                2
             },
             0x33 => {
                 // INC SP
                 self.registers.sp = self.registers.sp.wrapping_add(1);
+                2
             },
             0x34 => {
                 // INC (HL)
@@ -525,6 +582,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                3
             },
             0x35 => {
                 // DEC (HL)
@@ -533,23 +591,28 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                3
             },
             0x36 => {
                 // LD (HL), d8
                 self.memory.data[self.get_hl() as usize] = self.next_instruction();
+                3
             },
             0x37 => {
                 // SCF
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, true);
+                1
             },
             0x38 => {
                 // JR C, s8
                 let offset = self.next_instruction() as u8 as u16;
                 if self.get_flag(Flag::C) {
                     self.registers.pc = self.registers.pc.wrapping_add(offset);
+                    return 3
                 }
+                2
             },
             0x39 => {
                 // ADD HL, SP
@@ -558,15 +621,18 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, (self.get_hl() & 0xFFF) + (self.registers.sp & 0xFFF) > 0xFFF);
                 self.set_flag(Flag::C, self.get_hl() as u32 + self.registers.sp as u32 > 0xFFFF);
+                2
             },
             0x3A => {
                 // LDD A, (HL)
                 self.registers.a = self.memory.data[self.get_hl() as usize];
                 self.set_hl(self.get_hl().wrapping_sub(1));
+                2
             },
             0x3B => {
                 // DEC SP
                 self.registers.sp = self.registers.sp.wrapping_sub(1);
+                2
             },
             0x3C => {
                 // INC A
@@ -575,6 +641,7 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x3D => {
                 // DEC A
@@ -583,10 +650,12 @@ impl CPU{
                 self.set_flag(Flag::Z, result.zero.unwrap());
                 self.set_flag(Flag::N, result.add_sub.unwrap());
                 self.set_flag(Flag::H, result.half_carry.unwrap());
+                1
             },
             0x3E => {
                 // LD A, d8
                 self.registers.a = self.next_instruction();
+                2
             },
             0x3F => {
                 // CCF
@@ -594,222 +663,277 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, !c);
+                1
             },
             0x40 => {
                 // LD B, B
                 self.registers.b = self.registers.b;
+                1
             },
             0x41 => {
                 // LD B, C
                 self.registers.b = self.registers.c;
+                1
             },
             0x42 => {
                 // LD B, D
                 self.registers.b = self.registers.d;
+                1
             },
             0x43 => {
                 // LD B, E
                 self.registers.b = self.registers.e;
+                1
             },
             0x44 => {
                 // LD B, H
                 self.registers.b = self.registers.h;
+                1
             },
             0x45 => {
                 // LD B, L
                 self.registers.b = self.registers.l;
+                1
             },
             0x46 => {
                 // LD B, (HL)
                 self.registers.b = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x47 => {
                 // LD B, A
                 self.registers.b = self.registers.a;
+                1
             },
             0x48 => {
                 // LD C, B
                 self.registers.c = self.registers.b;
+                1
             },
             0x49 => {
                 // LD C, C
                 self.registers.c = self.registers.c;
+                1
             },
             0x4A => {
                 // LD C, D
                 self.registers.c = self.registers.d;
+                1
             },
             0x4B => {
                 // LD C, E
                 self.registers.c = self.registers.e;
+                1
             },
             0x4C => {
                 // LD C, H
                 self.registers.c = self.registers.h;
+                1
             },
             0x4D => {
                 // LD C, L
                 self.registers.c = self.registers.l;
+                1
             },
             0x4E => {
                 // LD C, (HL)
                 self.registers.c = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x4F => {
                 // LD C, A
                 self.registers.c = self.registers.a;
+                1
             },
             0x50 => {
                 // LD D, B
                 self.registers.d = self.registers.b;
+                1
             },
             0x51 => {
                 // LD D, C
                 self.registers.d = self.registers.c;
+                1
             },
             0x52 => {
                 // LD D, D
                 self.registers.d = self.registers.d;
+                1
             },
             0x53 => {
                 // LD D, E
                 self.registers.d = self.registers.e;
+                1
             },
             0x54 => {
                 // LD D, H
                 self.registers.d = self.registers.h;
+                1
             },
             0x55 => {
                 // LD D, L
                 self.registers.d = self.registers.l;
+                1
             },
             0x56 => {
                 // LD D, (HL)
                 self.registers.d = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x57 => {
                 // LD D, A
                 self.registers.d = self.registers.a;
+                1
             },
             0x58 => {
                 // LD E, B
                 self.registers.e = self.registers.b;
+                1
             },
             0x59 => {
                 // LD E, C
                 self.registers.e = self.registers.c;
+                1
             },
             0x5A => {
                 // LD E, D
                 self.registers.e = self.registers.d;
+                1
             },
             0x5B => {
                 // LD E, E
                 self.registers.e = self.registers.e;
+                1
             },
             0x5C => {
                 // LD E, H
                 self.registers.e = self.registers.h;
+                1
             },
             0x5D => {
                 // LD E, L
                 self.registers.e = self.registers.l;
+                1
             },
             0x5E => {
                 // LD E, (HL)
                 self.registers.e = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x5F => {
                 // LD E, A
                 self.registers.e = self.registers.a;
+                1
             },
             0x60 => {
                 // LD H, B
                 self.registers.h = self.registers.b;
+                1
             },
             0x61 => {
                 // LD H, C
                 self.registers.h = self.registers.c;
+                1
             },
             0x62 => {
                 // LD H, D
                 self.registers.h = self.registers.d;
+                1
             },
             0x63 => {
                 // LD H, E
                 self.registers.h = self.registers.e;
+                1
             },
             0x64 => {
                 // LD H, H
                 self.registers.h = self.registers.h;
+                1
             },
             0x65 => {
                 // LD H, L
                 self.registers.h = self.registers.l;
+                1
             },
             0x66 => {
                 // LD H, (HL)
                 self.registers.h = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x67 => {
                 // LD H, A
                 self.registers.h = self.registers.a;
+                1
             },
             0x68 => {
                 // LD L, B
                 self.registers.l = self.registers.b;
+                1
             },
             0x69 => {
                 // LD L, C
                 self.registers.l = self.registers.c;
+                1
             },
             0x6A => {
                 // LD L, D
                 self.registers.l = self.registers.d;
+                1
             },
             0x6B => {
                 // LD L, E
                 self.registers.l = self.registers.e;
+                1
             },
             0x6C => {
                 // LD L, H
                 self.registers.l = self.registers.h;
+                1
             },
             0x6D => {
                 // LD L, L
                 self.registers.l = self.registers.l;
+                1
             },
             0x6E => {
                 // LD L, (HL)
                 self.registers.l = self.memory.data[self.get_hl() as usize];
+                2
             },
             0x6F => {
                 // LD L, A
                 self.registers.l = self.registers.a;
+                1
             },
             0x70 => {
                 // LD (HL), B
                 self.memory.data[self.get_hl() as usize] = self.registers.b;
+                2
             },
             0x71 => {
                 // LD (HL), C
                 self.memory.data[self.get_hl() as usize] = self.registers.c;
+                2
             },
             0x72 => {
                 // LD (HL), D
                 self.memory.data[self.get_hl() as usize] = self.registers.d;
+                2
             },
             0x73 => {
                 // LD (HL), E
                 self.memory.data[self.get_hl() as usize] = self.registers.e;
+                2
             },
             0x74 => {
                 // LD (HL), H
                 self.memory.data[self.get_hl() as usize] = self.registers.h;
+                2
             },
             0x75 => {
                 // LD (HL), L
                 self.memory.data[self.get_hl() as usize] = self.registers.l;
+                2
             },
             0x76 =>{
                 // HALT
@@ -826,42 +950,52 @@ impl CPU{
                 // If the interrupt master enable flag is set, the contents of the program coounter are pushed to the stack and control jumps to the starting address of the interrupt.
 
                 // If the RESET terminal goes LOW in HALT mode, the mode becomes that of a normal reset.
+                1
             },
             0x77 => {
                 // LD (HL), A
                 self.memory.data[self.get_hl() as usize] = self.registers.a;
+                2
             },
             0x78 => {
                 // LD A, B
                 self.registers.a = self.registers.b;
+                1
             },
             0x79 => {
                 // LD A, C
                 self.registers.a = self.registers.c;
+                1
             },
             0x7A => {
                 // LD A, D
                 self.registers.a = self.registers.d;
+                1
             },
             0x7B => {
                 // LD A, E
                 self.registers.a = self.registers.e;
+                1
             },
             0x7C => {
                 // LD A, H
                 self.registers.a = self.registers.h;
+                1
             },
             0x7D => {
                 // LD A, L
                 self.registers.a = self.registers.l;
+                1
             },
             0x7E => {
                 // LD A, (HL)
                 self.registers.a = self.memory.data[self.get_hl() as usize];
+                1
             },
             0x7F => {
                 // LD A, A
                 self.registers.a = self.registers.a;
+                1
             },
             0x80 => {
                 // ADD A, B
@@ -871,6 +1005,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             }
             0x81 => {
                 // ADD A, C
@@ -880,6 +1015,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x82 => {
                 // ADD A, D
@@ -889,6 +1025,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x83 => {
                 // ADD A, E
@@ -898,6 +1035,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x84 => {
                 // ADD A, H
@@ -907,6 +1045,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x85 => {
                 // ADD A, L
@@ -916,6 +1055,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x86 => {
                 // ADD A, (HL)
@@ -925,6 +1065,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                2
             },
             0x87 => {
                 // ADD A, A
@@ -934,6 +1075,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x88 => {
                 // ADC A, B
@@ -943,6 +1085,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x89 => {
                 // ADC A, C
@@ -952,6 +1095,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x8A => {
                 // ADC A, D
@@ -961,6 +1105,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x8B => {
                 // ADC A, E
@@ -970,6 +1115,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x8C => {
                 // ADC A, H
@@ -979,6 +1125,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x8D => {
                 // ADC A, L
@@ -988,6 +1135,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x8E => {
                 // ADC A, (HL)
@@ -997,6 +1145,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                2
             },
             0x8F => {
                 // ADC A, A
@@ -1006,6 +1155,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x90 => {
                 // SUB B
@@ -1015,6 +1165,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x91 => {
                 // SUB C
@@ -1024,6 +1175,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x92 => {
                 // SUB D
@@ -1033,6 +1185,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },  
             0x93 => {
                 // SUB E
@@ -1042,6 +1195,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x94 => {
                 // SUB H
@@ -1051,6 +1205,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x95 => {
                 // SUB L
@@ -1060,6 +1215,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x96 =>{
                 // SUB (HL)
@@ -1069,6 +1225,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                2
             },
             0x97 => {
                 // SUB A
@@ -1078,6 +1235,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x98 => {
                 // SBC A, B
@@ -1087,6 +1245,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x99 => {
                 // SBC A, C
@@ -1096,6 +1255,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x9A => {
                 // SBC A, D
@@ -1105,6 +1265,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x9B => {
                 // SBC A, E
@@ -1114,6 +1275,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x9C => {
                 // SBC A, H
@@ -1123,6 +1285,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x9D => {
                 // SBC A, L
@@ -1132,6 +1295,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0x9E => {
                 // SBC A, (HL)
@@ -1141,6 +1305,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                2
             },
             0x9F => {
                 // SBC A, A
@@ -1150,6 +1315,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xA0 => {
                 // AND B
@@ -1159,6 +1325,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA1 => {
                 // AND C
@@ -1168,6 +1335,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA2 => {
                 // AND D
@@ -1177,6 +1345,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA3 => {
                 // AND E
@@ -1186,6 +1355,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA4 => {
                 // AND H
@@ -1195,6 +1365,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA5 => {
                 // AND L
@@ -1204,6 +1375,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA6 => {
                 // AND (HL)
@@ -1213,6 +1385,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                2
             },
             0xA7 => {
                 // AND A
@@ -1222,6 +1395,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, true);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA8 => {
                 // XOR B
@@ -1231,6 +1405,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xA9 => {
                 // XOR C
@@ -1240,6 +1415,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xAA => {
                 // XOR D
@@ -1249,6 +1425,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xAB => {
                 // XOR E
@@ -1258,6 +1435,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xAC => {
                 // XOR H
@@ -1267,6 +1445,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xAD => {
                 // XOR L
@@ -1276,6 +1455,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xAE => {
                 // XOR (HL)
@@ -1285,6 +1465,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                2
             },
             0xAF => {
                 // XOR A
@@ -1294,6 +1475,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB0 => {
                 // OR B
@@ -1303,6 +1485,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB1 => {
                 // OR C
@@ -1312,6 +1495,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB2 => {
                 // OR D
@@ -1321,6 +1505,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB3 => {
                 // OR E
@@ -1330,6 +1515,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB4 => {
                 // OR H
@@ -1339,6 +1525,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB5 => {
                 // OR L
@@ -1348,6 +1535,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB6 => {
                 // OR (HL)
@@ -1357,6 +1545,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                2
             },
             0xB7 => {
                 // OR A
@@ -1366,6 +1555,7 @@ impl CPU{
                 self.set_flag(Flag::N, false);
                 self.set_flag(Flag::H, false);
                 self.set_flag(Flag::C, false);
+                1
             },
             0xB8 => {
                 // CP B
@@ -1374,6 +1564,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xB9 => {
                 // CP C
@@ -1382,6 +1573,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xBA => {
                 // CP D
@@ -1390,6 +1582,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xBB => {
                 // CP E
@@ -1398,6 +1591,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xBC => {
                 // CP H
@@ -1406,6 +1600,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xBD => {
                 // CP L
@@ -1414,6 +1609,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xBE => {
                 // CP (HL)
@@ -1422,6 +1618,7 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                2
             },
             0xBF => {
                 // CP A
@@ -1430,29 +1627,36 @@ impl CPU{
                 self.set_flag(Flag::N, true);
                 self.set_flag(Flag::H, result.half_carry.unwrap());
                 self.set_flag(Flag::C, result.carry.unwrap());
+                1
             },
             0xC0 => {
                 // RET NZ
                 if !self.get_flag(Flag::Z) {
                     self.registers.pc = self.pop();
+                    return 5
                 }
+                2
             },
             0xC1 => {
                 // POP BC
                 let value = self.pop();
                 self.set_bc(value);
+                3
             },
             0xC2 => {
                 // JP NZ, a16
                 let address = self.read_word();
                 if !self.get_flag(Flag::Z) {
                     self.registers.pc = address;
+                    return 4
                 }
+                3
             },
             0xC3 => {
                 // JP a16
                 let address = self.read_word();
                 self.registers.pc = address;
+                4
             },
             0xC4 => {
                 // CALL NZ, a16
@@ -1460,11 +1664,14 @@ impl CPU{
                 if !self.get_flag(Flag::Z) {
                     self.push(self.registers.pc);
                     self.registers.pc = address;
+                    return 6
                 }
+                3
             },
             0xC5 => {
                 // PUSH BC
                 self.push(self.get_bc());
+                4
             },
             0xC6 => {
                 // ADD A, d8
@@ -1474,34 +1681,41 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,value.half_carry.unwrap());
                 self.set_flag(Flag::C,value.carry.unwrap());
+                2
 
             },
             0xC7 => {
                 // RST 00H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x00;
+                4
             },
             0xC8 => {
                 // RET Z
                 if self.get_flag(Flag::Z) {
                     self.registers.pc = self.pop();
+                    return 5
                 }
+                2
             },
             0xC9 => {
                 // RET
                 self.registers.pc = self.pop();
+                4
             },
             0xCA => {
                 // JP Z, a16
                 let address = self.read_word();
                 if self.get_flag(Flag::Z) {
                     self.registers.pc = address;
+                    return 4
                 }
+                3
             },
             0xCB => {
                 // PREFIX CB TODO
                 let opcode = self.next_instruction();
-                self.execute_cb_instruction(opcode);
+                self.execute_cb_instruction(opcode)
             },
             0xCC => {
                 // CALL Z, a16
@@ -1509,13 +1723,16 @@ impl CPU{
                 if self.get_flag(Flag::Z) {
                     self.push(self.registers.pc);
                     self.registers.pc = address;
+                    return 6
                 }
+                3
             },
             0xCD => {
                 // CALL a16
                 let address = self.read_word();
                 self.push(self.registers.pc);
                 self.registers.pc = address;
+                6
             },
             0xCE => {
                 // ADC A, d8
@@ -1525,29 +1742,36 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,value.half_carry.unwrap());
                 self.set_flag(Flag::C,value.carry.unwrap());
+                2
             },
             0xCF => {
                 // RST 08H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x08;
+                4
             },
             0xD0 => {
                 // RET NC
                 if !self.get_flag(Flag::C) {
                     self.registers.pc = self.pop();
+                    return 5
                 }
+                2
             },
             0xD1 => {
                 // POP DE
                 let value = self.pop();
                 self.set_de(value);
+                3
             },
             0xD2 => {
                 // JP NC, a16
                 let address = self.read_word();
                 if !self.get_flag(Flag::C) {
                     self.registers.pc = address;
+                    return 4
                 }
+                3
             },
             0xD4 => {
                 // CALL NC, a16
@@ -1555,11 +1779,14 @@ impl CPU{
                 if !self.get_flag(Flag::C) {
                     self.push(self.registers.pc);
                     self.registers.pc = address;
+                    return 6
                 }
+                3
             },
             0xD5 => {
                 // PUSH DE
                 self.push(self.get_de());
+                4
             },
             0xD6 => {
                 // SUB d8
@@ -1569,17 +1796,21 @@ impl CPU{
                 self.set_flag(Flag::N,true);
                 self.set_flag(Flag::H,value.half_carry.unwrap());
                 self.set_flag(Flag::C,value.carry.unwrap());
+                2
             },
             0xD7 => {
                 // RST 10H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x10;
+                4
             },
             0xD8 => {
                 // RET C
                 if self.get_flag(Flag::C) {
                     self.registers.pc = self.pop();
+                    return 5
                 }
+                2
             },
             0xD9 => {
                 // RETI
@@ -1589,13 +1820,16 @@ impl CPU{
                 // The contents of the address specified by the stack pointer SP are loaded in the lower-order byte of PC, and the contents of SP are incremented by 1. 
                 //The contents of the address specified by the new SP value are then loaded in the higher-order byte of PC, and the contents of SP are incremented by 1 again. 
                 //(THe value of SP is 2 larger than before instruction execution.) The next instruction is fetched from the address specified by the content of PC (as usual)
+                4
             },
             0xDA => {
                 // JP C, a16
                 let address = self.read_word();
                 if self.get_flag(Flag::C) {
                     self.registers.pc = address;
+                    return 4
                 }
+                3
             },
             0xDC => {
                 // CALL C, a16
@@ -1603,7 +1837,9 @@ impl CPU{
                 if self.get_flag(Flag::C) {
                     self.push(self.registers.pc);
                     self.registers.pc = address;
+                    return 6
                 }
+                3
             },
             0xDE => {
                 // SBC A, d8
@@ -1613,30 +1849,36 @@ impl CPU{
                 self.set_flag(Flag::N,true);
                 self.set_flag(Flag::H,value.half_carry.unwrap());
                 self.set_flag(Flag::C,value.carry.unwrap());
+                2
             },
             0xDF => {
                 // RST 18H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x18;
+                4
             },
             0xE0 => {
                 // LDH (a8), A
                 let address = 0xFF00 + self.next_instruction() as u16;
                 self.memory.data[address as usize] = self.registers.a;
+                3
             },
             0xE1 => {
                 // POP HL
                 let value = self.pop();
                 self.set_hl(value);
+                3
             },
             0xE2 => {
                 // LD (C), A
                 let address = 0xFF00 + self.registers.c as u16;
                 self.memory.data[address as usize] = self.registers.a;
+                2
             },
             0xE5 => {
                 // PUSH HL
                 self.push(self.get_hl());
+                4
             },
             0xE6 => {
                 // AND d8
@@ -1646,11 +1888,13 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,true);
                 self.set_flag(Flag::C,false);
+                2
             },
             0xE7 => {
                 // RST 20H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x20;
+                4
             },
             0xE8 => {
                 // ADD SP, r8
@@ -1661,15 +1905,18 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,result.half_carry.unwrap());
                 self.set_flag(Flag::C,result.carry.unwrap());
+                4
             },
             0xE9 => {
                 // JP (HL)
                 self.registers.pc = self.get_hl();
+                1
             },
             0xEA => {
                 // LD (a16), A
                 let address = self.read_word();
                 self.memory.data[address as usize] = self.registers.a;
+                4
             },
             0xEE => {
                 // XOR d8
@@ -1679,26 +1926,31 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,false);
                 self.set_flag(Flag::C,false);
+                2
             },
             0xEF => {
                 // RST 28H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x28;
+                4
             },
             0xF0 => {
                 // LDH A, (a8)
                 let address = 0xFF00 + self.next_instruction() as u16;
                 self.registers.a = self.memory.data[address as usize];
+                3
             },
             0xF1 => {
                 // POP AF
                 let value = self.pop();
                 self.set_af(value);
+                3
             },
             0xF2 => {
                 // LD A, (C)
                 let address = 0xFF00 + self.registers.c as u16;
                 self.registers.a = self.memory.data[address as usize];
+                2
             },
             0xF3 => {
                 // DI
@@ -1706,10 +1958,12 @@ impl CPU{
                 // Disables interrupts but not immediately. Interrupts are disabled after instruction after DI is executed.
                 // The DI instruction disables maskable interrupts but not non-maskable interrupts. 
                 // The interrupt enable flag is reset to 0. The next instruction is fetched from the address specified by the content of the program counter PC.
+                1
             },
             0xF5 => {
                 // PUSH AF
                 self.push(self.get_af());
+                4
             },
             0xF6 => {
                 // OR d8
@@ -1719,11 +1973,13 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,false);
                 self.set_flag(Flag::C,false);
+                2
             },
             0xF7 => {
                 // RST 30H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x30;
+                4
             },
             0xF8 => {
                 // LD HL, SP+r8
@@ -1734,15 +1990,18 @@ impl CPU{
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,result.half_carry.unwrap());
                 self.set_flag(Flag::C,result.carry.unwrap());
+                3
             },
             0xF9 => {
                 // LD SP, HL
                 self.registers.sp = self.get_hl();
+                2
             },
             0xFA => {
                 // LD A, (a16)
                 let address = self.read_word();
                 self.registers.a = self.memory.data[address as usize];
+                4
             },
             0xFB => {
                 // EI
@@ -1750,6 +2009,7 @@ impl CPU{
                 // Enables interrupts but not immediately. Interrupts are enabled after instruction after
                 // EI
                 // is executed. The EI instruction enables maskable interrupts. The interrupt enable flag is set to 1. The next instruction is fetched from the address specified by the content of the program counter PC.
+                1
             },
             0xFE => {
                 // CP d8
@@ -1758,25 +2018,28 @@ impl CPU{
                 self.set_flag(Flag::N,true);
                 self.set_flag(Flag::H,value.half_carry.unwrap());
                 self.set_flag(Flag::C,value.carry.unwrap());
+                2
             },
             0xFF => {
                 // RST 38H
                 self.push(self.registers.pc);
                 self.registers.pc = 0x38;
+                4
             },
             _ => {
                 // Unhandled instruction
-                
+                panic!("This should not panic");
             }
         }
             
         }
 
-    fn execute_cb_instruction(&mut self, instruction: u8){
+    fn execute_cb_instruction(&mut self, instruction: u8) -> u8{
         // TODO
         match instruction {
             _ => {
                 // Unhandled instruction
+                panic!("This should not panic");
             }
         }
     }
