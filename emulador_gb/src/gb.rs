@@ -1,4 +1,4 @@
-use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -2035,8 +2035,87 @@ impl CPU{
         }
 
     fn execute_cb_instruction(&mut self, instruction: u8) -> u8{
-        // TODO
         match instruction {
+            0x00 => {
+                // RLC B
+                let value = rlc(self.registers.b);
+                self.registers.b = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x01 => {
+                // RLC C
+                let value = rlc(self.registers.c);
+                self.registers.c = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x02 => {
+                // RLC D
+                let value = rlc(self.registers.d);
+                self.registers.d = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x03 => {
+                // RLC E
+                let value = rlc(self.registers.e);
+                self.registers.e = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x04 => {
+                // RLC H
+                let value = rlc(self.registers.h);
+                self.registers.h = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x05 => {
+                // RLC L
+                let value = rlc(self.registers.l);
+                self.registers.l = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x06 => {
+                // RLC (HL)
+                let value = rlc(self.memory.data[self.get_hl() as usize]);
+                self.memory.data[self.get_hl() as usize] = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                4
+            },
+            0x07 => {
+                // RLC A
+                let value = rlc(self.registers.a);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
             _ => {
                 // Unhandled instruction
                 panic!("This should not panic");
