@@ -145,6 +145,18 @@ pub fn rlc(value: u8) -> Result{
     }
 }
 
+pub fn rrc(value: u8) -> Result{
+    let carry = value & 0x01 != 0;
+    let result = (value >> 1) | (if carry { 0x80 } else { 0 });
+    Result {
+        value: result,
+        zero: Some(result == 0),
+        add_sub: Some(false),
+        half_carry: Some(false),
+        carry: Some(carry),
+    }
+}
+
 
 #[cfg(test)]
     mod tests {
