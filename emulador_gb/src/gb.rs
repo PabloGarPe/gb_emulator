@@ -1,4 +1,4 @@
-use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc,rl};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -2170,6 +2170,106 @@ impl CPU{
                 // RRC L
                 let value = rrc(self.registers.h);
                 self.registers.e = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x0E => {
+                // RRC (HL)
+                let value = rrc(self.memory.data[self.get_hl() as usize]);
+                self.memory.data[self.get_hl() as usize] = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                4
+            },
+            0x0F => {
+                // RRC A
+                let value = rrc(self.registers.a);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x10 => {
+                // RL B
+                let value = rl(self.registers.b,self.registers.f);
+                self.registers.b = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x11 => {
+                // RL C
+                let value = rl(self.registers.c,self.registers.f);
+                self.registers.c = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x12 => {
+                // RL D
+                let value = rl(self.registers.d,self.registers.f);
+                self.registers.d = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x13 => {
+                // RL E
+                let value = rl(self.registers.e,self.registers.f);
+                self.registers.e = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x14 => {
+                // RL H
+                let value = rl(self.registers.h,self.registers.f);
+                self.registers.h = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x15 => {
+                // RL L
+                let value = rl(self.registers.l,self.registers.f);
+                self.registers.l = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x16 => {
+                // RL HL
+                let value = rl(self.memory.data[self.get_hl() as usize],self.registers.f);
+                self.memory.data[self.get_hl() as usize] = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                4
+            },
+            0x17 => {
+                // RL A
+                let value = rl(self.registers.a,self.registers.f);
+                self.registers.a = value.value;
                 self.set_flag(Flag::Z,value.zero.unwrap());
                 self.set_flag(Flag::N,false);
                 self.set_flag(Flag::H,false);
