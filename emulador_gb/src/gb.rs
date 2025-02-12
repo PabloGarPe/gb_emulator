@@ -1,4 +1,4 @@
-use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc,rl};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc,rl,rr};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -2275,7 +2275,87 @@ impl CPU{
                 self.set_flag(Flag::H,false);
                 self.set_flag(Flag::C,value.carry.unwrap());
                 2
-            }
+            },
+            0x18 => {
+                // RR B
+                let value = rr(self.registers.b,self.registers.f);
+                self.registers.b = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x19 => {
+                // RR C
+                let value = rr(self.registers.c,self.registers.f);
+                self.registers.c = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x1A => {
+                // RR D
+                let value = rr(self.registers.d,self.registers.f);
+                self.registers.d = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x1B => {
+                // RR E
+                let value = rr(self.registers.e,self.registers.f);
+                self.registers.e = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x1C => {
+                // RR H
+                let value = rr(self.registers.h,self.registers.f);
+                self.registers.h = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x1D => {
+                // RR L
+                let value = rr(self.registers.l,self.registers.f);
+                self.registers.l = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x1E => {
+                // RR (HL)
+                let value = rr(self.memory.data[self.get_hl() as usize],self.registers.f);
+                self.memory.data[self.get_hl() as usize] = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                4
+            },
+            0x1F => {
+                // RR A
+                let value = rr(self.registers.a,self.registers.f);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
 
             _ => {
                 // Unhandled instruction

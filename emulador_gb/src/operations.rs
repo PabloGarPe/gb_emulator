@@ -170,6 +170,19 @@ pub fn rl(value: u8,flags: u8) -> Result{
     }
 }
 
+pub fn rr(value: u8,flags: u8) -> Result{
+    let zero = value & 1 != 0;
+    let carry = (flags & 0x10) >> 4;
+    let result = (value >> 1) | (carry << 7);
+    Result {
+        value: result,
+        zero: Some(result == 0),
+        add_sub: Some(false),
+        half_carry: Some(false),
+        carry: Some(zero),
+    }
+}
+
 #[cfg(test)]
     mod tests {
         use super::*;
