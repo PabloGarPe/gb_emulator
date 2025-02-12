@@ -1,4 +1,4 @@
-use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc,rl,rr,sla};
+use crate::operations::{add, dec, inc, adc, sub, sbc, and, or, xor, cp, add_sp,rlc,rrc,rl,rr,sla, sra};
 
 const MEMORY_SIZE: usize = 65536;
 const ROM_BANK_0: usize = 0x0000; // ROM Bank 0 (32KB) HOME BANK
@@ -2429,6 +2429,86 @@ impl CPU{
             0x27 => {
                 // SLA A
                 let value = sla(self.registers.a);
+                self.registers.a = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x28 => {
+                // SRA B
+                let value = sra(self.registers.b);
+                self.registers.b = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x29 => {
+                // SRA C
+                let value = sra(self.registers.c);
+                self.registers.c = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x2A => {
+                // SRA D
+                let value = sra(self.registers.d);
+                self.registers.d = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x2B => {
+                // SRA E
+                let value = sra(self.registers.e);
+                self.registers.e = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x2C => {
+                // SRA H
+                let value = sra(self.registers.h);
+                self.registers.h = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x2D => {
+                // SRA L
+                let value = sra(self.registers.l);
+                self.registers.l = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                2
+            },
+            0x2E => {
+                // SRA (HL)
+                let value = sra(self.memory.data[self.get_hl() as usize]);
+                self.memory.data[self.get_hl() as usize] = value.value;
+                self.set_flag(Flag::Z,value.zero.unwrap());
+                self.set_flag(Flag::N,false);
+                self.set_flag(Flag::H,false);
+                self.set_flag(Flag::C,value.carry.unwrap());
+                4
+            },
+            0x2F => {
+                // SRA A
+                let value = sra(self.registers.a);
                 self.registers.a = value.value;
                 self.set_flag(Flag::Z,value.zero.unwrap());
                 self.set_flag(Flag::N,false);
